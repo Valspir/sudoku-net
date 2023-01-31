@@ -442,7 +442,7 @@ class Brain {
 
 brainArray = []
 weightCount=0
-function createBrain(inputs=27, hiddenLayers=hidLayers, hiddenCount=hidLayerNodes, outputs=10, outputFunctions={softmax,softmax,softmax}) {
+function createBrain(inputs=81, hiddenLayers=hidLayers, hiddenCount=hidLayerNodes, outputs=10, outputFunctions={softmax,softmax,softmax}) {
     inputNodes = []
     hiddenNodes = []
     outputNodes = []
@@ -565,6 +565,20 @@ async function useBrains() {
                     document.getElementById("curCol").innerText = c;
                     //r = Math.floor(Math.random()*9)
                     //c = Math.floor(Math.random()*9)
+                    currentInput = 0
+                    for(h = 0; h < playableGrid.length; h++) {
+                      for(v = 0; v < playableGrid[h].length; v++) {
+                        if(h != r && v != r) {
+                          selectedbrain.setInput(currentInput,(1/9)*playableGrid[h][v])
+                          currentInput+=1
+                        }else{
+                          selectedbrain.setInput(currentInput,(1/9)*playableGrid[h][v])
+                          currentInput+=1
+                        }
+                      }
+                    }
+
+                    /*
                     row = getRow(playableGrid,r)
                     column = getColumn(playableGrid,c)
                     square = getSquare(playableGrid,r,c)
@@ -609,7 +623,7 @@ async function useBrains() {
                     delete currentInput
                     delete row
                     delete column
-                    delete square
+                    delete square*/
                     selectedbrain.think()
                     high = 0
                     highestNode = 0
@@ -751,9 +765,7 @@ function fakeAI() {
       r = 0
       c = 0
     }
-    row = softmax(getRow(playableGrid,r))
-    column = softmax(getColumn(playableGrid,c))
-    square = softmax(getSquare(playableGrid,r,c))
+
     solutions = [1,2,3,4,5,6,7,8,9]
 
     //console.log(row)
