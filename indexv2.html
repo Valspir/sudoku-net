@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<head>
+    <title>Bored Project</title>
+    <style>
+        #container{
+          float: left;
+            height: 450px;
+            width: 450px;
+            position: relative;
+        }
+        #board {
+            height: 450px;
+            width: 450px;
+            outline: 5px solid;
+            position: absolute;
+        }
+        .square {
+            outline: 4px solid;
+            height: 150px;
+            width: 150px;
+            float: left;
+            z-index: 9;
+        }
+        .tile {
+            outline: 1px solid;
+            height: 50px;
+            width: 50px;
+            float:left;
+
+        }
+        .cellValue {
+            position: relative;
+            font-size: 20px;
+            padding-top: 20%;
+        }
+
+        .numbers {
+            display: inline;
+            letter-spacing: 20px;
+        }
+        #sim {
+          padding: 2%;
+          height: 110%;
+          overflow: hidden;
+        }
+
+        #simsettings {
+          width: 500px;
+          height: 650px;
+          float: right;
+          outline: 4px solid;
+          overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <center>
+      <div id="sim">
+        <div id="container">
+            <div id="board">
+
+            </div>
+        </div>
+        <div id="simsettings">
+          <p>Learning Rate (0.0001 - 1): <input type="number" id="learn_rate" onchange="learn_rate=parseFloat(document.getElementById('learn_rate').value)" value=0.1 min=0.0000 max=1 step=0.01 name="Learning rate"/></p>
+          <p>Population Size: <input type="number" id="popSize" onchange="popSize=parseInt(document.getElementById('popSize').value)" value=20 min=1 max=500 step=1/></p>
+          <p>Hidden Layer Count: <input type="number" id="hidLayers" onchange="hidLayers=parseInt(document.getElementById('hidLayers').value)" value=2 min=1 max=10 step=1/></p>
+          <p>Hidden Layer Node Count: <input type="number" id="hidLayerNodes" onchange="hidLayerNodes=parseInt(document.getElementById('hidLayerNodes').value)" value=20 min=1 max=100 step=1/></p>
+          <p>Mutation Probability: <input type="number" id="mutProb" onchange="mutProb=parseInt(document.getElementById('mutProb').value)" value=2 min=0 max=10 step=1/></p>
+          <button onclick="restart()">Create Brains</button>
+          <p>Generation: <p id="generation"></p> Current Score: <p id="currentScore"></p> Highest Score: <p id="highestScore"></p></p>
+          <p>Current Row: <p id="curRow"></p>
+          <p>Current Column: <p id="curCol"></p>
+        </div>
+        <div id="numberList">
+
+        </div>
+      </div>
+    </center>
+</body>
+<script>
+mutProb = parseInt(document.getElementById('mutProb').value)
+popSize = parseInt(document.getElementById('popSize').value)
+hidLayers = parseInt(document.getElementById('hidLayers').value)
+hidLayerNodes = parseInt(document.getElementById('hidLayerNodes').value)
+learn_rate = parseFloat(document.getElementById('learn_rate').value)
+grid = []
+playableGrid = []
+
+function restart() {
+  document.getElementById('generation').innerText = '0';
+  document.getElementById('highestScore').innerText = '0';
+  document.getElementById('currentScore').innerText = '0';
+  document.getElementById('curRow').innerText = '0';
+  document.getElementById('curCol').innerText = '0';
+  createBrain();
+  useBrains();
+}
+
+function createArray() {
+    grid = []
+    playableGrid = []
+    for(i = 0; i < 9; i++) {
+        grid.push([])
+        playableGrid.push([])
+        for(j = 0; j < 9; j++) {
+            grid[i].push(0)
+        }
+    }
+
+}
+
+function getRow(grid,row) {
+    return grid[row];
+}
+
+function getColumn(grid,column) {
+    col = []
+    grid.forEach((rows, i) => {
+        col.push(rows[column])
+    })
+    return col
+}
+
+function getSquare(grid,row,column) {
+    square = []
+    if(row < 3) {
+        if(column < 3) {
+            for(i = 0; i < 3; i++) {
+                for(j = 0; j < 3; j++) {
+                    square.push(grid[i][j])
+                }
+            }
+        }else if(column < 6) {
+            for(i = 0; i < 3; i++) {
+                for(j = 3; j < 6; j++) {
+                    square.push(grid[i][j])
+                }
+            }
+        }else if(column < 9) {
+            for(i = 0; i < 3; i++) {
+                for(j = 6; j < 9; j++) {
+                    square.push(grid[i][j])
+                }
+            }
+        }
+    }else if(row < 6) {
+        if(column < 3) {
+            for(i = 3; i < 6; i++) {
+                for(j = 0; j < 3; j++) {
+                    square.push(grid[i][j])
+                }
+            }
+        }else if(column < 6) {
+            for(i = 3; i < 6; i++) {
+                for(j = 3; j < 6; j++) {
+                    square.push(grid[i][j])
+                }
+            }
+        }else if(column < 9) {
+            for(i = 3; i < 6; i++) {
+                for(j = 6; j < 9; j++) {
+                    square.push(grid[i][j])
+                }
+            }
+        }
+    }else if(row < 9) {
+        if(column < 3) {
+            for(i = 6; i < 9; i++) {
+                for(j = 0; j < 3; j++) {
+                    square.push(grid[i][j])
+                }
+            }
+        }else if(column < 6) {
+            for(i = 6; i < 9; i++) {
+                for(j = 3; j < 6; j++) {
+                    square.push(grid[i][j])
+                }
+            }
+        }else if(column < 9) {
+            for(i = 6; i < 9; i++) {
+                for(j = 6; j < 9; j++) {
+                    square.push(grid[i][j])
+                }
+            }
+        }
+    }
+    return square
+}
+
+function drawGrid(g=grid) {
+    document.getElementById("container").innerHTML = ""
+    board = document.createElement("div")
+    board.setAttribute("id","board")
+    document.getElementById("container").appendChild(board)
+    for(i = 0; i < 9; i++) {
+        sq = document.createElement("div");
+        sq.setAttribute("class","square")
+        document.getElementById("container").appendChild(sq)
+    }
+    g.forEach((row) => {
+        row.forEach((tile) => {
+            div = document.createElement("div")
+            div.setAttribute("class", "tile")
+            val = document.createElement("span")
+
+            val.textContent = tile
+            val.setAttribute("class", "cellValue")
+            div.appendChild(val)
+            board.appendChild(div)
+        })
+    })
+
+}
+
+function checkGrid(g=grid) {
+    inArr = 1
+    g.forEach((currentRow) => {
+        if(currentRow.includes(0)) {
+            inArr = 0
+        }
+    })
+    return inArr
+}
+
+function shuffle(array) {
+    let currentIndex = array.length,  randomIndex;
+    // While there remain elements to shuffle.
+    while (currentIndex != 0) {
+        // Pick a remaining element.
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        // And swap it with the current element.
+        [array[currentIndex], array[randomIndex]] = [
+        array[randomIndex], array[currentIndex]];
+    }
+    return array;
+}
+
+function fillGrid(row,column) {
+    if(row == 8 && column == 9) {
+        return true
+    }
+
+    if(column == 9) {
+        row+=1
+        column = 0
+    }
+    nA = [1,2,3,4,5,6,7,8,9]
+    nA = shuffle(nA)
+
+    if(grid[row][column] == 0) {
+        nA.forEach((value) => {
+            if(!getRow(grid,row).includes(value) && !getColumn(grid,column).includes(value) && !getSquare(grid,row,column).includes(value)) {
+                grid[row][column] = value
+                drawGrid()
+                if(fillGrid(row,column+1)) {
+                    return true
+                }
+            }
+        })
+        //grid[row][column] = 0
+    }else{
+        if(fillGrid(row,column+1)) {
+            return true
+        }
+    }
+    return false
+}.9
+
+function createBoardConfig() {
+    while(!checkGrid()) {
+        //console.log("Creating Board")
+        createArray()
+        fillGrid(0,0)
+    }
+    populateGrid()
+    drawGrid(playableGrid)
+}
+
+blankCount = 0
+function populateGrid() {
+    grid.forEach((row, r) => {
+        row.forEach((tile, c) => {
+            addTile = Math.floor(Math.random()*20);
+            if(addTile < 19) {
+                playableGrid[r].push(tile)
+            }else{
+                blankCount++
+                playableGrid[r].push(0)
+            }
+        })
+    })
+}
+
+function setTile(r,c,val) {
+    playableGrid[r][c] = val
+    if(grid[r][c] != val) {
+        //console.log(false)
+    }else{
+        //console.log(true)
+    }
+    drawGrid(playableGrid)
+}
+
+
+createArray()
+populateGrid()
+createBoardConfig()
+
+const delay = (delayInms) => {
+  return new Promise(resolve => setTimeout(resolve, delayInms));
+}
+
+//Machine Learning Code:
+
+eul = 2.7182818
+
+function pow(val,pow) {
+    return Math.pow(val,pow)
+}
+
+function softmax(inputs) {
+
+    vals = []
+    sum = 0
+    for(i = 0; i < inputs.length; i++) {
+      sum+=Math.pow(eul,inputs[i])
+    }
+    for(i = 0; i < inputs.length; i++) {
+      vals.push(Math.pow(eul,inputs[i])/sum)
+    }
+    return vals
+}
+
+function tanh(x) {
+    return (pow(eul,x)-pow(eul,-x))/(pow(eul,x)+pow(eul,-x))
+}
+
+function sigmoid(val) {
+    return 1/(1+Math.pow(eul,-val))
+}
+
+function outputFunction(val) {
+    return Math.round(relu(tanh(val)*9))
+}
+
+
+function relu(val) {
+    if(val > 0) {
+        return val
+    }else{
+        return 0
+    }
+}
+
+function binStep(val) {
+
+}
+
+class Brain {
+    constructor(nodes, weights) {
+        this.nodes = nodes;
+        this.weights = weights;
+        this.rating = 0;
+    }
+    async think() {
+        var start = Date.now();
+        for(var wl = 0; wl < this.weights.length; wl++) {
+            var weightLayer = this.weights[wl]
+            for(var w = 0; w < weightLayer.length; w++) {
+                var weight = weightLayer[w]
+                //console.log(weight)
+                this.nodes[weight[0]+1][weight[2]] += this.nodes[weight[0]][weight[1]]*weight[3]
+            }
+        }
+        for(var i = 0; i < this.nodes.length; i++) {
+            var nodeLayers = this.nodes[i]
+            if(i != 0) {
+                for(var n = 0; n < nodeLayers.length; n++) {
+                    var node = nodeLayers[n]
+                    if(i != 3) {
+                        this.nodes[i][n] = tanh(node)
+                    }
+                }
+            }
+        }
+
+        var newNodes = softmax(this.nodes[3])
+        for(i = 0; i < newNodes.length; i++) {
+          this.nodes[3][i] = newNodes[i]
+        }
+        var end = Date.now();
+    }
+    setInput(n,val) {
+        this.nodes[0][n] = val
+    }
+    updateRating(rating) {
+        this.rating = rating
+    }
+}
+
+brainArray = []
+weightCount=0
+function createBrain(inputs=27, hiddenLayers=hidLayers, hiddenCount=hidLayerNodes, outputs=10, outputFunctions={softmax,softmax,softmax}) {
+    inputNodes = []
+    hiddenNodes = []
+    outputNodes = []
+    weights = []
+    for(i = 0; i < inputs; i++) {
+        inputNodes.push(0)
+    }
+    for(i = 0; i < hiddenLayers; i++) {
+        hiddenNodes.push([])
+        for(j = 0; j < hiddenCount; j++) {
+            hiddenNodes[i].push(0)
+        }
+    }
+    for(i = 0; i < outputs; i++) {
+        outputNodes.push(0)
+    }
+    weights.push([])
+    for(input = 0; input < inputs; input++) {
+        for(hidden = 0; hidden < hiddenCount; hidden++) {
+            weightCount++
+            weights[0].push([0,input,hidden,(Math.random()*2-1)*0.1])
+        }
+    }
+    weights.push([])
+    for(hidden1 = 0; hidden1 < hiddenCount; hidden1++) {
+        for(hidden2 = 0; hidden2 < hiddenCount; hidden2++) {
+            weightCount++
+            weights[1].push([1,hidden1,hidden2,Math.random()*2-1])
+        }
+    }
+    weights.push([])
+    for(hidden = 0; hidden < hiddenCount; hidden++) {
+        for(output = 0; output < outputs; output++) {
+            weightCount++
+            weights[2].push([2,hidden,output,Math.random()*2-1])
+        }
+    }
+    nodes = [inputNodes,hiddenNodes[0],hiddenNodes[1],outputNodes]
+
+    brain = new Brain(nodes,weights)
+    for(i = 0; i < popSize; i++) {
+      brainArray.push(brain)
+    }
+}
+
+function mutateBrain(brain) {
+    newWeights = []
+    brain.weights.forEach((weightLayer,i) => {
+        newWeights.push([])
+        chooseLayer = Math.floor(Math.random()*2);
+        if(chooseLayer < 3) {
+            weightLayer.forEach((weights) => {
+              changeWeight = Math.floor(Math.random()*10);
+              if(changeWeight < mutProb) {
+                newWeights[i].push([weights[0],weights[1],weights[2],weights[3] + ((Math.random()*2)-1)*learn_rate])
+              }else{
+                newWeights[i].push([weights[0],weights[1],weights[2],weights[3]])
+              }
+            })
+        }else{
+          weightLayer.forEach((weights) => {
+            newWeights[i].push([weights[0],weights[1],weights[2],weights[3]])
+          })
+        }
+    })
+    delete brain
+    let newBrain = new Brain(brain.nodes, newWeights)
+    brainArray.push(newBrain)
+}
+
+highestScore = 0
+async function useBrains() {
+    generation = 0
+    while(true) {
+      r=0
+      c=0
+      curBoardPos = 0
+      createArray()
+      populateGrid()
+      createBoardConfig()
+      while(!checkGrid(playableGrid)) {
+
+          let ratings = []
+          for(sB = 0; sB < brainArray.length; sB++) {
+              selectedbrain=brainArray[sB]
+              if(selectedbrain != 0) {
+                correct = 1
+                skips = 2
+                var brainRating = 10
+                while(correct) {
+                    await delay(0);
+                    if(r == 9) {
+                      c+=1
+                      r = 0
+                    }
+                    if(c == 9) {
+                      r = 0
+                      c = 0
+                      curBwhiteoardPos = 0
+                    }
+                    document.getElementById("curRow").innerText = r;
+                    document.getElementById("curCol").innerText = c;
+                    //r = Math.floor(Math.random()*9)
+                    //c = Math.floor(Math.random()*9)
+                    row = softmax(getRow(playableGrid,r))
+                    column = softmax(getColumn(playableGrid,c))
+                    square = softmax(getSquare(playableGrid,r,c))
+                    let currentInput = 0
+                    for(i of row) {
+                        if(i != grid[r][c]) {
+                          try {
+                            selectedbrain.setInput(currentInput, i);
+                          }catch{
+                            console.log(selectedbrain)
+                            //throw new Error("Something went badly wrong!");
+                          }
+                            currentInput++
+                        }else{
+                          try {
+                            selectedbrain.setInput(currentInput, -1);
+                          }catch{
+                            console.log(selectedbrain)
+                            //throw new Error("Something went badly wrong!");
+                          }
+                            currentInput++
+                        }
+                    }
+                    for(i of column) {
+                        if(i != grid[r][c]) {
+                            selectedbrain.setInput(currentInput, i);
+                            currentInput++
+                        }else{
+                            selectedbrain.setInput(currentInput,-1)
+                            currentInput++
+                        }
+                    }
+                    for(i of square) {
+                        if(i != grid[r][c]) {
+                            selectedbrain.setInput(currentInput, i);
+                            currentInput++
+                        }else{
+                            selectedbrain.setInput(currentInput,-1)
+                            currentInput++
+                        }
+                    }
+                    delete currentInput
+                    delete row
+                    delete column
+                    delete square
+                    selectedbrain.think()
+                    high = 0
+                    highestNode = 0
+                    secondHighest = 0
+                    for(cn = 0; cn < selectedbrain.nodes[3].length; cn++) {
+                      if(selectedbrain.nodes[3][cn] > high) {
+                        high = selectedbrain.nodes[3][cn]
+                        secondHighest = highestNode
+                        highestNode = cn
+                      }
+                    }
+                    if(highestNode != 9 || skips == 0) {
+                      chosenNode = 0
+                      if(highestNode == 9) {
+                        chosenNode = secondHighest
+                      }else{
+                        chosenNode = highestNode+1
+                      }
+                      if(grid[r][c] == chosenNode) {
+                          setTile(r,c,chosenNode)
+                          correct = 1
+                          brainRating+=1
+                          r+=1
+                          curBoardPos++
+                          document.getElementById("board").childNodes[curBoardPos-1].style.backgroundColor = 'white'
+                          if(curBoardPos != 81) {
+                            document.getElementById("board").childNodes[curBoardPos].style.backgroundColor = 'yellow'
+                          }
+                      }else{
+                          rating = grid[r][c] - chosenNode
+                          if(rating < 0) {
+                              rating=rating*-1
+                          }
+                          brainRating-=(rating*0.1)
+                          correct = 0
+                      }
+                    }else{
+                      skips-=1
+                      correct = 1
+                      r+=1
+                      brainRating-=2
+                      curBoardPos++
+                      document.getElementById("board").childNodes[curBoardPos-1].style.backgroundColor = 'white'
+                      if(curBoardPos != 81) {
+                        document.getElementById("board").childNodes[curBoardPos].style.backgroundColor = 'yellow'
+                      }
+                      if(brainRating < 7) {
+                        correct = 0
+                      }
+                    }
+                    //delete r
+                    //delete c
+                    /*if(brainRating > 10) {
+                        console.log("Brain in generation: " + generation + " at rating: " + brainRating)
+                    }*/
+
+                }
+                document.getElementById("currentScore").innerText = brainRating;
+                ratings.push([selectedbrain,brainRating])
+            }
+          }
+          //console.log(ratings)
+          generation++
+          best = -1
+          brainArray.length = 0
+          bestBrain = 0
+          for(i = 0; i < ratings.length; i++) {
+              if(ratings[i][1] > best) {
+                  best = ratings[i][1]
+                  bestBrain = ratings[i][0]
+                  if(best > highestScore) {
+                      highestScore = best
+                      document.getElementById("highestScore").innerText = best;
+                  }
+              }
+          }
+          var sortedArray = ratings.sort((a,b) => b[1] - a[1])
+
+          //brainArray.push(sortedArray[0][0])
+          if(sortedArray.length != 1) {
+            for(i = 0; i < popSize/2; i++) {
+                mutateBrain(sortedArray[i][0])
+            }
+            for(i = 0; i < popSize/2; i++) {
+              mutateBrain(sortedArray[0][0])
+            }
+          }else{
+            for(i = 0; i < popSize; i++) {
+                mutateBrain(bestBrain)
+            }
+          }
+          if(generation%10000 == 0) {
+              console.log("Generation: " + generation + " Rating: " + best + " Highest: " + highestScore)
+          }
+          document.getElementById("generation").innerText = generation;
+          document.getElementById("currentScore").innerText = sortedArray[0][1];
+          delete ratings
+      }
+    }
+
+}
+
+function fakeAI() {
+  createArray()
+  populateGrid()
+  createBoardConfig()
+  r = 0
+  c = 0
+  correctCount = 0
+  iter = 0
+  while(!checkGrid(playableGrid)) {
+    r+=1
+    if(r == 9) {
+      r = 0
+      c+=1
+    }
+    if(c == 9) {
+      console.log("Round ", iter, ", ", correctCount, " Correct")
+      if(iter == 1000) {
+        break
+      }
+      iter++
+      correctCount = 0
+      r = 0
+      c = 0
+    }
+    row = getRow(playableGrid,r)
+    column = getColumn(playableGrid,c)
+    square = getSquare(playableGrid,r,c)
+    solutions = [1,2,3,4,5,6,7,8,9]
+
+    //console.log(row)
+    for(i = 0; i < row.length; i++) {
+      if(solutions.indexOf(row[i]) != -1) {
+        solutions.splice(solutions.indexOf(row[i]),1)
+      }
+    }
+    for(i = 0; i < square.length; i++) {
+      if(solutions.indexOf(square[i]) != -1) {
+        solutions.splice(solutions.indexOf(square[i]),1)
+      }
+    }
+    for(i = 0; i < column.length; i++) {
+      if(solutions.indexOf(column[i]) != -1) {
+        solutions.splice(solutions.indexOf(column[i]),1)
+      }
+    }
+    if(solutions.length == 1) {
+      correctCount++
+      setTile(r,c,solutions[0])
+    }
+    //console.log(solutions)
+    //break
+
+  }
+}
+
+function evaluateBrain(r,c,selectedbrain) {
+    row = getRow(playableGrid,r)
+    column = getColumn(playableGrid,c)
+    square = getSquare(playableGrid,r,c)
+    currentInput = 0
+    row.forEach((i) => {
+        selectedbrain.setInput(currentInput, i);
+        currentInput++
+    })
+    column.forEach((i) => {
+        selectedbrain.setInput(currentInput, i);
+        currentInput++
+    })
+    square.forEach((i) => {
+        selectedbrain.setInput(currentInput, i);
+        currentInput++
+    })
+    selectedbrain.think()
+    rating = grid[r][c] - selectedbrain.nodes[3][0]
+    if(rating < 0) {
+        rating=rating*-1
+    }
+    if(rating == 0) {
+        setTile(r,c,selectedbrain.nodes[3][0])
+    }
+    selectedbrain.updateRating(rating)
+    return [grid[r][c], selectedbrain.nodes[3][0], rating]
+}
+
+function playGame(brain) {
+    playableGrid.forEach((row,r) => {
+        row.forEach((tile, t) => {
+            evaluateBrain(r,t,brain)
+        })
+    })
+}
+
+//Create fitness algortith based on distance to correct score
+
+</script>
