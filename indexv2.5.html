@@ -70,6 +70,7 @@
           <p>Punishment Multiplier: <input type="number" id="punMulti" onchange="punMulti=parseInt(document.getElementById('punMulti').value)" step=0.1 value=0.1 min=0.00 max=1 /></p>
 
           <button onclick="restart()">Create Brains</button>
+          <p>Brain #: <p id="brainID"></p></p>
           <p>Generation: <p id="generation"></p> Current Score: <p id="currentScore"></p> Highest Score: <p id="highestScore"></p></p>
           <p>Avg Score: <p id="avgScore"></p></p>
           <p>Current Row: <p id="curRow"></p></p>
@@ -289,7 +290,7 @@ function populateGrid() {
     grid.forEach((row, r) => {
         row.forEach((tile, c) => {
             addTile = Math.floor(Math.random()*20);
-            if(addTile < 19) {
+            if(addTile < 15) {
                 playableGrid[r].push(tile)
             }else{
                 blankCount++
@@ -571,15 +572,16 @@ async function useBrains() {
         populateGrid()
         createBoardConfig()
         while(!checkGrid(playableGrid)) {
-
             let ratings = []
             for(sB = 0; sB < brainArray.length; sB++) {
+                document.getElementById("brainID").innerText = sB
                 selectedbrain=brainArray[sB]
                 if(selectedbrain != 0) {
                   correct = 1
                   skips = 2
                   var brainRating = 10
                   while(correct) {
+                    if(brainRating < 1000){
                       await delay(0);
                       if(r == 9) {
                         c+=1
@@ -629,12 +631,12 @@ async function useBrains() {
                             brainRating+=1
                             r+=1
                             curBoardPos++
-                            if(curBoardPos > 0 && curBoardPos < 81) {
+                            /*if(curBoardPos > 0 && curBoardPos < 81) {
                               document.getElementById("board").childNodes[curBoardPos-1].style.backgroundColor = 'white'
                             }
                             if(curBoardPos < 81) {
                               document.getElementById("board").childNodes[curBoardPos].style.backgroundColor = 'yellow'
-                            }
+                            }*/
                         }else{
                             rating = grid[r][c] - chosenNode
                             if(rating < 0) {
@@ -650,12 +652,12 @@ async function useBrains() {
                         selectedbrain.moves.push("S")
                         brainRating-=1*punMulti
                         curBoardPos++
-                        if(curBoardPos > 0 && curBoardPos < 81) {
+                        /*if(curBoardPos > 0 && curBoardPos < 81) {
                           document.getElementById("board").childNodes[curBoardPos-1].style.backgroundColor = 'white'
                         }
                         if(curBoardPos < 81) {
                           document.getElementById("board").childNodes[curBoardPos].style.backgroundColor = 'yellow'
-                        }
+                        }*/
                         if(brainRating < 7) {
                           correct = 0
                         }
@@ -665,10 +667,11 @@ async function useBrains() {
                       /*if(brainRating > 10) {
                           console.log("Brain in generation: " + generation + " at rating: " + brainRating)
                       }*/
-
+                      document.getElementById("currentScore").innerText = brainRating
                   }
                   document.getElementById("currentScore").innerText = brainRating;
                   ratings.push([selectedbrain,brainRating])
+                }
               }
             }
             //console.log(ratings)
@@ -710,7 +713,7 @@ async function useBrains() {
                 console.log("Generation: " + generation + " Rating: " + best + " Highest: " + highestScore)
             }
             document.getElementById("generation").innerText = generation;
-            document.getElementById("currentScore").innerText = sortedArray[0][1];
+
             document.getElementById("avgScore").innerText = Math.round((scoreSum/scoreCount)*1000)/1000;
             scoreSum = 0
             scoreCount = 0
