@@ -1,108 +1,22 @@
-<!DOCTYPE html>
-<head>
-    <title>Bored Project</title>
-    <style>
-        #container{
-          float: left;
-            height: 450px;
-            width: 450px;
-            position: relative;
-        }
-        #board {
-            height: 450px;
-            width: 450px;
-            outline: 5px solid;
-            position: absolute;
-        }
-        .square {
-            outline: 4px solid;
-            height: 150px;
-            width: 150px;
-            float: left;
-            z-index: 9;
-        }
-        .tile {
-            outline: 1px solid;
-            height: 50px;
-            width: 50px;
-            float:left;
 
-        }
-        .cellValue {
-            position: relative;
-            font-size: 20px;
-            padding-top: 20%;
-        }
-
-        .numbers {
-            display: inline;
-            letter-spacing: 20px;
-        }
-        #sim {
-          padding: 2%;
-          height: 110%;
-          overflow: hidden;
-        }
-
-        #simsettings {
-          width: 500px;
-          float: right;
-          outline: 4px solid;
-          overflow: hidden;
-        }
-    </style>
-</head>
-<body>
-    <center>
-      <div id="sim">
-        <div id="container">
-            <div id="board">
-
-            </div>
-        </div>
-        <div id="simsettings">
-          <p>Learning Rate (0.0001 - 1): <input type="number" id="learn_rate" onchange="learn_rate=parseFloat(document.getElementById('learn_rate').value)" value=0.1 min=0.0000 max=1 step=0.01 name="Learning rate"/></p>
-          <p>Population Size: <input type="number" id="popSize" onchange="popSize=parseInt(document.getElementById('popSize').value)" value=20 min=1 max=500 step=1/></p>
-          <p>Hidden Layer Count: <input type="number" id="hidLayers" onchange="hidLayers=parseInt(document.getElementById('hidLayers').value)" value=4 min=1 max=10 step=1/></p>
-          <p>Hidden Layer Node Count: <input type="number" id="hidLayerNodes" onchange="hidLayerNodes=parseInt(document.getElementById('hidLayerNodes').value)" value=20 min=1 max=100 step=1/></p>
-          <p>Mutation Probability: <input type="number" id="mutProb" onchange="mutProb=parseInt(document.getElementById('mutProb').value)" value=2 min=0 max=10 step=1/></p>
-          <p>Reward Multiplier: <input type="number" id="reMulti" onchange="reMulti=parseInt(document.getElementById('reMulti').value)" value=0.3 min=0 max=1 step=0.1 /></p>
-          <p>Punishment Multiplier: <input type="number" id="punMulti" onchange="punMulti=parseInt(document.getElementById('punMulti').value)" step=0.1 value=0.1 min=0.00 max=1 /></p>
-
-          <button onclick="restart()">Create Brains</button>
-          <p>Brain #: <p id="brainID"></p></p>
-          <p>Generation: <p id="generation"></p> Current Score: <p id="currentScore"></p> Highest Score: <p id="highestScore"></p></p>
-          <p>Avg Score: <p id="avgScore"></p></p>
-          <p>Current Row: <p id="curRow"></p></p>
-          <p>Current Column: <p id="curCol"></p></p>
-        </div>
-        <div id="numberList">
-
-        </div>
-      </div>
-      <svg id="svgCanvas" width="1000" height="5000">
-
-      </svg>
-    </center>
-</body>
-<script>
-reMulti = parseFloat(document.getElementById('reMulti').value)
-punMulti = parseFloat(document.getElementById('punMulti').value)
-mutProb = parseInt(document.getElementById('mutProb').value)
-popSize = parseInt(document.getElementById('popSize').value)
-hidLayers = parseInt(document.getElementById('hidLayers').value)
-hidLayerNodes = parseInt(document.getElementById('hidLayerNodes').value)
-learn_rate = parseFloat(document.getElementById('learn_rate').value)
+const { exec } = require("child_process");
+reMulti = 0.3//parseFloat(document.getElementById('reMulti').value)
+punMulti = 0.1//parseFloat(document.getElementById('punMulti').value)
+mutProb = 2//parseInt(document.getElementById('mutProb').value)
+popSize = 750//parseInt(document.getElementById('popSize').value)
+hidLayers = 2//parseInt(document.getElementById('hidLayers').value)
+hidLayerNodes = 100//parseInt(document.getElementById('hidLayerNodes').value)
+learn_rate = 0.3//parseFloat(document.getElementById('learn_rate').value)
 grid = []
 playableGrid = []
 
 function restart() {
-  document.getElementById('generation').innerText = '0';
+  /*document.getElementById('generation').innerText = '0';
   document.getElementById('highestScore').innerText = '0';
   document.getElementById('currentScore').innerText = '0';
   document.getElementById('avgScore').innerText = '0';
   document.getElementById('curRow').innerText = '0';
-  document.getElementById('curCol').innerText = '0';
+  document.getElementById('curCol').innerText = '0';*/
   createBrain();
   useBrains();
 }
@@ -198,7 +112,7 @@ function getSquare(grid,row,column) {
     return square
 }
 
-function drawGrid(g=grid) {
+/*function //drawGrid(g=grid) {
     document.getElementById("container").innerHTML = ""
     board = document.createElement("div")
     board.setAttribute("id","board")
@@ -221,7 +135,7 @@ function drawGrid(g=grid) {
         })
     })
 
-}
+}*/
 
 function checkGrid(g=grid) {
     inArr = 1
@@ -263,7 +177,7 @@ function fillGrid(row,column) {
         nA.forEach((value) => {
             if(!getRow(grid,row).includes(value) && !getColumn(grid,column).includes(value) && !getSquare(grid,row,column).includes(value)) {
                 grid[row][column] = value
-                drawGrid()
+                //drawGrid()
                 if(fillGrid(row,column+1)) {
                     return true
                 }
@@ -285,7 +199,7 @@ function createBoardConfig() {
         fillGrid(0,0)
     }
     populateGrid()
-    drawGrid(playableGrid)
+    //drawGrid(playableGrid)
 }
 
 blankCount = 0
@@ -310,7 +224,7 @@ function setTile(r,c,val) {
     }else{
         //console.log(true)
     }
-    drawGrid(playableGrid)
+    //drawGrid(playableGrid)
 }
 
 
@@ -368,7 +282,7 @@ function binStep(val) {
 
 }
 
-function showBrain(brain) {
+/*function showBrain(brain) {
   document.getElementById("svgCanvas").innerHTML = ""
   nodeCoords = []
   nodeArray = brain.nodes
@@ -390,16 +304,16 @@ function showBrain(brain) {
         }
         posX+=100
     }
- 
+
     for(wL = 0; wL < weightArray.length; wL++) {
-        
+
         for(w = 0; w < weightArray[wL].length; w++) {
             weight = weightArray[wL][w]
             startNode = nodeCoords[weight[0]][weight[1]]
             endNode = nodeCoords[weight[0]+1][weight[2]]
             if(endNode != undefined) {
                 line = document.createElementNS("http://www.w3.org/2000/svg","line")
-                line.setAttributeNS(null,"x1",startNode[0])
+                line.setAttriimport {exec} from "child_process";buteNS(null,"x1",startNode[0])
                 line.setAttributeNS(null,"y1",startNode[1])
                 line.setAttributeNS(null,"x2",endNode[0])
                 line.setAttributeNS(null,"y2",endNode[1])
@@ -412,8 +326,8 @@ function showBrain(brain) {
             }
         }
     }
-    }
-
+  }
+*/
 class Brain {
     constructor(nodes, weights) {
         this.nodes = nodes;
@@ -620,6 +534,7 @@ scoreSum = 0
 scoreCount = 0
 goat = 0
 highestScore = -1
+boardsCleared = 0
 async function useBrains() {
     generation = 0
     while(true) {
@@ -633,7 +548,7 @@ async function useBrains() {
         while(!checkGrid(playableGrid)) {
             let ratings = []
             for(sB = 0; sB < brainArray.length; sB++) {
-                document.getElementById("brainID").innerText = sB
+                //document.getElementById("brainID").innerText = sB
                 selectedbrain=brainArray[sB]
                 if(selectedbrain != 0) {
                   correct = 1
@@ -650,9 +565,15 @@ async function useBrains() {
                         r = 0
                         c = 0
                         curBoardPos = 0
+                        if(checkGrid(playableGrid)) {
+                          boardsCleared+=1
+                          brainRating+=5
+                        }else{
+                          brainRating-=2*punMulti
+                        }
                       }
-                      document.getElementById("curRow").innerText = r;
-                      document.getElementById("curCol").innerText = c;
+                      //document.getElementById("curRow").innerText = r;
+                      //document.getElementById("curCol").innerText = c;
                       currentInput = 0
                       for(h = 0; h < playableGrid.length; h++) {
                         for(v = 0; v < playableGrid[h].length; v++) {
@@ -726,10 +647,11 @@ async function useBrains() {
                       /*if(brainRating > 10) {
                           console.log("Brain in generation: " + generation + " at rating: " + brainRating)
                       }*/
-                      document.getElementById("currentScore").innerText = brainRating
-                      
+                      //document.getElementById("currentScore").innerText = brainRating
                   }
-                  document.getElementById("currentScore").innerText = brainRating;
+                  console.clear()
+                  process.stdout.write("Score: " + Math.round(brainRating*10)/10 + "\nBrain #: " + sB + "\nGeneration: " + generation + "\nHighest Score: " + Math.round(highestScore*10)/10 + "\nAvg Score: " + Math.round((scoreSum/scoreCount)*10)/10 + "\nBoards Cleared: " + boardsCleared)
+                  //document.getElementById("currentScore").innerText = brainRating;
                   ratings.push([selectedbrain,brainRating])
                 }
               }
@@ -748,7 +670,7 @@ async function useBrains() {
                     if(best > highestScore) {
                         highestScore = best
                         goat = bestBrain
-                        document.getElementById("highestScore").innerText = best;
+                        //document.getElementById("highestScore").innerText = best;
                     }
                 }
             }
@@ -769,18 +691,18 @@ async function useBrains() {
               }
             }
 
-            if(generation%10000 == 0) {
-                console.log("Generation: " + generation + " Rating: " + best + " Highest: " + highestScore)
+            if(generation%1 == 0) {
+                //console.log("Generation: " + generation + " Rating: " + best + " Highest: " + highestScore)
             }
-            document.getElementById("generation").innerText = generation;
-            document.getElementById("avgScore").innerText = Math.round((scoreSum/scoreCount)*1000)/1000;
-            
+            //document.getElementById("generation").innerText = generation;
+            //document.getElementById("avgScore").innerText = Math.round((scoreSum/scoreCount)*1000)/1000;
+
             //scoreSum = 0
             //scoreCount = 0
             delete ratings
           }
       }else{
-        console.log(brainArray.length)
+        //console.log(brainArray.length)
       }
     }
 
@@ -876,6 +798,6 @@ function playGame(brain) {
     })
 }
 
-//Create fitness algortith based on distance to correct score
 
-</script>
+restart()
+//Create fitness algortith based on distance to correct score
