@@ -390,9 +390,9 @@ function showBrain(brain) {
         }
         posX+=100
     }
- 
+
     for(wL = 0; wL < weightArray.length; wL++) {
-        
+
         for(w = 0; w < weightArray[wL].length; w++) {
             weight = weightArray[wL][w]
             startNode = nodeCoords[weight[0]][weight[1]]
@@ -640,7 +640,7 @@ async function useBrains() {
                   skips = 2
                   var brainRating = 10
                   while(correct) {
-                    if(brainRating < 1000){
+                    if(brainRating > 0){
                       await delay(0);
                       if(r == 9) {
                         c+=1
@@ -686,6 +686,7 @@ async function useBrains() {
                         selectedbrain.moves.push([chosenNode,grid[r][c],r,c])
                         if(grid[r][c] == chosenNode) {
                             setTile(r,c,chosenNode)
+                            drawGrid(playableGrid)
                             correct = 1
                             brainRating+=1
                             r+=1
@@ -727,7 +728,7 @@ async function useBrains() {
                           console.log("Brain in generation: " + generation + " at rating: " + brainRating)
                       }*/
                       document.getElementById("currentScore").innerText = brainRating
-                      
+
                   }
                   document.getElementById("currentScore").innerText = brainRating;
                   ratings.push([selectedbrain,brainRating])
@@ -774,7 +775,7 @@ async function useBrains() {
             }
             document.getElementById("generation").innerText = generation;
             document.getElementById("avgScore").innerText = Math.round((scoreSum/scoreCount)*1000)/1000;
-            
+
             //scoreSum = 0
             //scoreCount = 0
             delete ratings
@@ -840,32 +841,52 @@ function fakeAI() {
 }
 
 function evaluateBrain(r,c,selectedbrain) {
-    row = getRow(playableGrid,r)
-    column = getColumn(playableGrid,c)
-    square = getSquare(playableGrid,r,c)
-    currentInput = 0
-    row.forEach((i) => {
-        selectedbrain.setInput(currentInput, i);
-        currentInput++
-    })
-    column.forEach((i) => {
-        selectedbrain.setInput(currentInput, i);
-        currentInput++
-    })
-    square.forEach((i) => {
-        selectedbrain.setInput(currentInput, i);
-        currentInput++
-    })
-    selectedbrain.think()
-    rating = grid[r][c] - selectedbrain.nodes[3][0]
-    if(rating < 0) {
-        rating=rating*-1
+  selectedbrain = new Brain(selectedbrain.nodes,selectedbrain.weights)
+  if(r == 9) {
+    c+=1
+    r = 0
+  }
+  if(c == 9) {
+    r = 0
+    c = 0
+    curBoardPos = 0
+  }
+  document.getElementById("curRow").innerText = r;
+  document.getElementById("curCol").innerText = c;
+  currentInput = 0
+  for(h = 0; h < playableGrid.length; h++) {
+    for(v = 0; v < playableGrid[h].length; v++) {
+      if(grid[r][c] != grid[h][v]) { //Fix, what happens when grid[r][c] == 0
+        selectedbrain.setInput(currentInput,(1/9)*playableGrid[h][v])
+        currentInput+=1
+      }else{
+        selectedbrain.setInput(currentInput,-1)
+        currentInput+=1
+      }
     }
-    if(rating == 0) {
-        setTile(r,c,selectedbrain.nodes[3][0])
+  }
+  selectedbrain.think()
+  high = 0
+  highestNode = 0
+  secondHighest = 0
+  for(cn = 0; cn < selectedbrain.nodes[selectedbrain.nodes.length-1].length; cn++) {
+    if(selectedbrain.nodes[selectedbrain.nodes.length-1][cn] > high) {
+      high = selectedbrain.nodes[selectedbrain.nodes.length-1][cn]
+      secondHighest = highestNode
+      highestNode = cn
     }
-    selectedbrain.updateRating(rating)
-    return [grid[r][c], selectedbrain.nodes[3][0], rating]
+  }
+  if(highestNode != 9) {
+    if(grid[r][c] == highestNode+1) {
+      setTile(r,c,highestNode+1)
+      drawGrid(playableGrid)
+    }else{
+      return "Wrong: " + [grid[r][c], highestNode+1]
+    }
+  }else{
+    return "S"
+  }
+  return
 }
 
 function playGame(brain) {

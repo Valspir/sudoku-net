@@ -1,11 +1,12 @@
 
 const { exec } = require("child_process");
+const fs = require("fs")
 reMulti = 0.3//parseFloat(document.getElementById('reMulti').value)
 punMulti = 0.1//parseFloat(document.getElementById('punMulti').value)
 mutProb = 2//parseInt(document.getElementById('mutProb').value)
 popSize = 750//parseInt(document.getElementById('popSize').value)
 hidLayers = 2//parseInt(document.getElementById('hidLayers').value)
-hidLayerNodes = 100//parseInt(document.getElementById('hidLayerNodes').value)
+hidLayerNodes = 50//parseInt(document.getElementById('hidLayerNodes').value)
 learn_rate = 0.3//parseFloat(document.getElementById('learn_rate').value)
 grid = []
 playableGrid = []
@@ -403,7 +404,7 @@ class Brain {
         this.nodes[0][n] = val
     }
     updateRating(rating) {
-        this.rating = rating
+        this.rating = ratingdrawGrid
     }
 }
 
@@ -554,8 +555,12 @@ async function useBrains() {
                   correct = 1
                   skips = 2
                   var brainRating = 10
+                  boardsSkipped = 0
                   while(correct) {
-                    if(brainRating < 1000){
+                    if(brainRating > 0){
+                      if(brainRating > 10000 && brainRating < 10010) {
+                        fs.writeFileSync("training_complete.brn",JSON.stringify(selectedbrain))
+                      }
                       await delay(0);
                       if(r == 9) {
                         c+=1
@@ -569,7 +574,12 @@ async function useBrains() {
                           boardsCleared+=1
                           brainRating+=5
                         }else{
-                          brainRating-=2*punMulti
+                          boardsSkipped+=1
+                          brainRating-=2
+                          if(boardsSkipped > 5) {
+                            correct = 0
+                            break
+                          }
                         }
                       }
                       //document.getElementById("curRow").innerText = r;
