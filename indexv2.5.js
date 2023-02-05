@@ -208,7 +208,7 @@ function populateGrid() {
     grid.forEach((row, r) => {
         row.forEach((tile, c) => {
             addTile = Math.floor(Math.random()*20);
-            if(addTile < 15) {
+            if(addTile < 7) {
                 playableGrid[r].push(tile)
             }else{
                 blankCount++
