@@ -25,6 +25,10 @@ function sigmoid(val) {
   return (1/(1+Math.pow(2.71828182846, -val)));
 }
 
+function tanh(x) {
+    return (Math.pow(eul,x)-Math.pow(eul,-x))/(Math.pow(eul,x)+Math.pow(eul,-x))
+}
+
 class Brain {
     constructor(nodes, weights) {
         this.nodes = nodes;
@@ -59,20 +63,20 @@ class Brain {
             if(i != 0) {
                 for(var n = 0; n < nodeLayers.length; n++) {
                     var node = nodeLayers[n]
-                    if(i != this.nodes.length-1) {
-                      if(isNaN(this.nodes[i][n]) || isNaN(sigmoid(node))) {
+                    if(i != this.nodes.length) {
+                      if(isNaN(this.nodes[i][n]) || isNaN(tanh(node))) {
                         console.log("-----")
                         console.log(i)
                         console.log(this.nodes[i])
-                        console.log(sigmoid(node))
+                        console.log(tanh(node))
                         debugger
                       }
-                        this.nodes[i][n] = sigmoid(node)
+                        this.nodes[i][n] = tanh(node)
                     }
                 }
             }
         }
-        var sum = 0
+        /*var sum = 0
         for(var p = 0; p < this.nodes[this.nodes.length-1].length; p++) {
           if(isNaN(this.nodes[this.nodes.length-1][p])) {
             console.log(this.nodes[2])
@@ -91,7 +95,7 @@ class Brain {
         }
         for(var p = 0; p < this.nodes[this.nodes.length-1].length; p++) {
           this.nodes[this.nodes.length-1][p] = Math.pow(eul,this.nodes[this.nodes.length-1][p])/sum
-        }
+        }*/
         //var newNodes = softmax(this.nodes[this.nodes.length-1])
         //Object.assign(this.nodes[this.nodes.length-1],newNodes)
         var end = Date.now();
@@ -106,7 +110,7 @@ class Brain {
 
 popSize = 50
 brainArray = []
-function createBrain(inputs=784, hiddenLayers=4, hiddenCount=400, outputs=4) {
+function createBrain(inputs=784, hiddenStruct=[600,350,150,25], outputs=4) {
     inputNodes = []
     hiddenNodes = []
     outputNodes = []
@@ -114,11 +118,18 @@ function createBrain(inputs=784, hiddenLayers=4, hiddenCount=400, outputs=4) {
     for(i = 0; i < inputs; i++) {
         inputNodes.push(0)
     }
-    for(i = 0; i < hiddenLayers; i++) {
+    /*for(i = 0; i < hiddenLayers; i++) {
         hiddenNodes.push([])
         for(j = 0; j < hiddenCount; j++) {
             hiddenNodes[i].push(0)
         }
+    }*/
+    for(i = 0; i < hiddenStruct.length; i++) {
+      cL = hiddenStruct[i]
+      hiddenNodes.push([])
+      for(j = 0; j < cL; j++) {
+        hiddenNodes[i].push(0)
+      }
     }
     for(i = 0; i < outputs; i++) {
         outputNodes.push(0)
@@ -225,14 +236,15 @@ const delay = (delayInms) => {
 
 
 
-async function playGame(gWS) {
+async function playGame(gWS,aiM) {
   generation = 0
   while(true) {
     ratings = []
     for(sB = 0; sB < brainArray.length; sB++) {
       brainRating = 0
       selectedbrain = brainArray[sB]
-      while(brainRating >= 0) {
+      endGame = 0
+      while(brainRating >= 0 && endGame == 0) {
         await delay(0);
         ret = gWS();
         ret.forEach((r, i) => {
@@ -258,19 +270,26 @@ async function playGame(gWS) {
         if(isNaN(selectedbrain.nodes[selectedbrain.nodes.length-1][0])) {
           brainRating-=2
         }
+        hitWall = 0
         if(confidence > 0.49) {
-          brainRating+=0.3
-          aiM(highestNode)
+          //console.log(highestNode+":"+confidence)
+          //brainRating+=0.3
+          ret = aiM(highestNode)
+          score = ret[0]
+          hitWall = ret[1]
+          brainRating+=score
         }else{
-          brainRating-=0.5
+          brainRating-=0.2
         }
-        /*if(hitWall > 5) {
-          brainRating-=0.25
-        }*/
+        if(hitWall > 0) {
+          brainRating-=1
+          endGame = 1
+        }
       }
       selectedbrain.rating = brainRating
       ratings.push([selectedbrain,brainRating])
     }
+    console.log(generation)
     brainArray = []
     var sortedArray = ratings.sort((a,b) => b[1] - a[1])
     if(sortedArray.length != 1) {

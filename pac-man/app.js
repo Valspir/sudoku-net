@@ -130,12 +130,12 @@ var brain = require('./brain')
   gNB = getNearBlocks;
 
   //move pacman
-  function aiMove(dir,squares) {
+  function aiMove(dir) {
     d = new Date();
     oldPos = pacmanCurrentIndex;
     squares[pacmanCurrentIndex].splice(sq[pacmanCurrentIndex].indexOf('pac-man'),1)
     if(dir == 0) {
-      if(!squares[pacmanCurrentIndex-1].indexOf('wall') != -1 && !squares[pacmanCurrentIndex -1].indexOf('ghost-lair') != -1) {
+      if(!squares[pacmanCurrentIndex-1].includes('wall') && !squares[pacmanCurrentIndex -1].includes('ghost-lair')) {
         pacmanCurrentIndex -= 1
         if (squares[pacmanCurrentIndex -1] === squares[363]) {
           pacmanCurrentIndex = 391
@@ -147,32 +147,32 @@ var brain = require('./brain')
       }
     }
     if(dir == 2) { //Up
-      if(pacmanCurrentIndex - width >= 0 && !squares[pacmanCurrentIndex -width].indexOf('wall') != -1 && !squares[pacmanCurrentIndex -width].indexOf('ghost-lair') != -1) {
+      if(pacmanCurrentIndex - width >= 0 && !squares[pacmanCurrentIndex -width].includes('wall') && !squares[pacmanCurrentIndex -width].includes('ghost-lair')) {
         pacmanCurrentIndex -= width
         score += 0.02;
       }else{
-        //hitWall++;
+        hitWall++;
         score -= 0.01;
       }
     }
     if(dir == 1) { //Right
-      if(pacmanCurrentIndex % width < width - 1 && !squares[pacmanCurrentIndex +1].indexOf('wall') != -1 && !squares[pacmanCurrentIndex +1].indexOf('ghost-lair') != -1) {
+      if(pacmanCurrentIndex % width < width - 1 && !squares[pacmanCurrentIndex +1].includes('wall') && !squares[pacmanCurrentIndex +1].includes('ghost-lair')) {
         pacmanCurrentIndex += 1
         if (squares[pacmanCurrentIndex +1] === squares[392]) {
           pacmanCurrentIndex = 364
         }
         score += 0.02;
       }else{
-        //hitWall++;
+        hitWall++;
         score -= 0.01;
       }
     }
     if(dir == 3) { //Down
-      if (!squares[pacmanCurrentIndex +width].indexOf('wall')  != -1 && !squares[pacmanCurrentIndex +width].indexOf('ghost-lair') != -1) {
+      if (!squares[pacmanCurrentIndex+width].includes('wall') && !squares[pacmanCurrentIndex+width].includes('ghost-lair')) {
         pacmanCurrentIndex += width
         score += 0.02;
       }else{
-        //hitWall++;
+        hitWall++;
         score -= 0.01;
       }
     }
@@ -187,6 +187,7 @@ var brain = require('./brain')
     powerPelletEaten(squares)
     checkForGameOver(squares)
     checkForWin(squares)
+    return [score,hitWall]
   }
 
   aiM = aiMove;
@@ -246,7 +247,7 @@ var brain = require('./brain')
   function pacDotEaten(squares) {
     if (squares[pacmanCurrentIndex].indexOf('pac-dot') != -1) {
       score++
-      scoreDisplay.innerHTML = score
+      //scoreDisplay.innerHTML = score
       squares[pacmanCurrentIndex].splice(squares[pacmanCurrentIndex].indexOf('pac-dot'),1)
     }
   }
@@ -459,4 +460,4 @@ var brain = require('./brain')
 //})
 
 brain.createBrain()
-brain.playGame(gWS)
+brain.playGame(gWS,aiM)
