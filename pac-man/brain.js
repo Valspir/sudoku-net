@@ -63,16 +63,14 @@ class Brain {
             if(i != 0) {
                 for(var n = 0; n < nodeLayers.length; n++) {
                     var node = nodeLayers[n]
-                    if(i != this.nodes.length) {
-                      if(isNaN(this.nodes[i][n]) || isNaN(tanh(node))) {
-                        console.log("-----")
-                        console.log(i)
-                        console.log(this.nodes[i])
-                        console.log(tanh(node))
-                        debugger
-                      }
-                        this.nodes[i][n] = tanh(node)
+                    if(isNaN(this.nodes[i][n]) || isNaN(sigmoid(node))) {
+                      console.log("-----")
+                      console.log(i)
+                      console.log(this.nodes[i])
+                      console.log(sigmoid(node))
+                      debugger
                     }
+                    this.nodes[i][n] = sigmoid(node)
                 }
             }
         }
@@ -110,7 +108,7 @@ class Brain {
 
 popSize = 50
 brainArray = []
-function createBrain(inputs=784, hiddenStruct=[600,350,150,25], outputs=4) {
+function createBrain(inputs=784, hiddenStruct=[450,150,25], outputs=4) {
     inputNodes = []
     hiddenNodes = []
     outputNodes = []
@@ -173,14 +171,13 @@ function mutateBrain(brain) {
                 newWeight = (weights[3] + ((Math.random()*2)-1)*0.3)
                 if(!(newWeight > 1) && !newWeight < -1) {
                   newWeights[i].push([weights[0],weights[1],weights[2],newWeight])
-
                 }else{
                   newWeight = (weights[3] - ((Math.random()*2)-1)*0.3)
                   if(!(newWeight < -1) && !(newWeight > 1)) {
                     newWeights[i].push([weights[0],weights[1],weights[2],newWeight])
                   }else{
-                      newWeights[i].push([weights[0],weights[1],weights[2],weights[3]])
-                    }
+                    newWeights[i].push([weights[0],weights[1],weights[2],weights[3]])
+                  }
                 }
               }else{
                 newWeights[i].push([weights[0],weights[1],weights[2],weights[3]])

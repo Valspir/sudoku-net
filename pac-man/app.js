@@ -107,6 +107,8 @@ var brain = require('./brain')
       return 0;
     }else if(sq[blockID].includes("power-pellet")) {
       return 1;
+    }else{
+      return 0;
     }
   }
 
