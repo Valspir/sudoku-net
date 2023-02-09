@@ -16,7 +16,7 @@ var scoreCount = 0;
 var scoreSum = 0;
 var localScore = 0;
 var livingTick = 0;
-
+const util = require('util')
 
 
 eul = 2.7182818
@@ -108,7 +108,7 @@ class Brain {
 
 popSize = 100
 brainArray = []
-function createBrain(inputs=784, hiddenStruct=[450,150,25], outputs=4) {
+function createBrain(inputs=121, hiddenStruct=[80,50,20], outputs=4) {
     inputNodes = []
     hiddenNodes = []
     outputNodes = []
@@ -158,6 +158,7 @@ function getScreen() {
 
 
 }
+
 
 function mutateBrain(brain) {
     newWeights = []

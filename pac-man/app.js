@@ -123,8 +123,15 @@ var brain = require('./brain')
 
   function getWholeScreen() {
     var screenArr = [];
-    for(i = 0; i < squares.length; i++) {
-      screenArr.push(getClass(i));
+    //if(pacmanCurrentIndex)
+    for(i = -(5*28); i < 5*28+1; i+=28) {
+      for(j = -5; j < 6; j++) {
+        if((pacmanCurrentIndex+j)+i < 784) {
+          screenArr.push(getClass((pacmanCurrentIndex+j)+i));
+        }else{
+          screenArr.push(-1)
+        }
+      }
     }
     return screenArr;
   }
@@ -306,7 +313,7 @@ var brain = require('./brain')
       ghosts.forEach(ghost => clearInterval(ghost.timerId))
       //////document.removeEventListener('keyup', movePacman)
       resetBoard(squares);
-      score = 0;
+      //score = 0;
       //restart();
     }
   }, 500*timeScale);
@@ -414,7 +421,7 @@ var brain = require('./brain')
   }, ghost.speed*timeScale)*/
 
   function resetBoard(squares) {
-    score = 0;
+    //score = 0;
     idleTime = d.getTime();
     ghosts.forEach(ghost => clearInterval(ghost.timerId))
     //document.removeEventListener('keyup', movePacman)
@@ -446,7 +453,7 @@ var brain = require('./brain')
       ghosts.forEach(ghost => clearInterval(ghost.timerId))
       //document.removeEventListener('keyup', movePacman)
       resetBoard(squares);
-      score = 0;
+      score = -5;
       //restart();
     }
   }
@@ -456,7 +463,7 @@ var brain = require('./brain')
     if (score === 274) {
       ghosts.forEach(ghost => clearInterval(ghost.timerId))
       //document.removeEventListener('keyup', movePacman)
-      setTimeout(function(){ alert("You have WON!"); }, 500)
+      //setTimeout(function(){ alert("You have WON!"); }, 500)
     }
   }
 //})
