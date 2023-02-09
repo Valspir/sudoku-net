@@ -639,6 +639,8 @@ async function useBrains() {
                   correct = 1
                   skips = 2
                   var brainRating = 10
+                  boardsSkipped = 0
+                  boardsCleared = 0
                   while(correct) {
                     if(brainRating > 0){
                       await delay(0);
@@ -650,6 +652,17 @@ async function useBrains() {
                         r = 0
                         c = 0
                         curBoardPos = 0
+                        if(checkGrid(playableGrid)) {
+                          boardsCleared+=1
+                          brainRating+=5
+                        }else{
+                          boardsSkipped+=1
+                          brainRating-=2
+                          if(boardsSkipped > 5) {
+                            correct = 0
+                            break
+                          }
+                        }
                       }
                       document.getElementById("curRow").innerText = r;
                       document.getElementById("curCol").innerText = c;

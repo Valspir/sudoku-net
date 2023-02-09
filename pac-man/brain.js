@@ -60,7 +60,7 @@ class Brain {
         }
         for(var i = 0; i < this.nodes.length; i++) {
             var nodeLayers = this.nodes[i]
-            if(i != 0) {
+            if(i != 0  && i != nodeLayers.length-1) {
                 for(var n = 0; n < nodeLayers.length; n++) {
                     var node = nodeLayers[n]
                     if(isNaN(this.nodes[i][n]) || isNaN(sigmoid(node))) {
@@ -74,7 +74,7 @@ class Brain {
                 }
             }
         }
-        /*var sum = 0
+        var sum = 0
         for(var p = 0; p < this.nodes[this.nodes.length-1].length; p++) {
           if(isNaN(this.nodes[this.nodes.length-1][p])) {
             console.log(this.nodes[2])
@@ -93,7 +93,7 @@ class Brain {
         }
         for(var p = 0; p < this.nodes[this.nodes.length-1].length; p++) {
           this.nodes[this.nodes.length-1][p] = Math.pow(eul,this.nodes[this.nodes.length-1][p])/sum
-        }*/
+        }
         //var newNodes = softmax(this.nodes[this.nodes.length-1])
         //Object.assign(this.nodes[this.nodes.length-1],newNodes)
         var end = Date.now();
@@ -106,7 +106,7 @@ class Brain {
     }
 }
 
-popSize = 50
+popSize = 100
 brainArray = []
 function createBrain(inputs=784, hiddenStruct=[450,150,25], outputs=4) {
     inputNodes = []
@@ -268,16 +268,16 @@ async function playGame(gWS,aiM) {
           brainRating-=2
         }
         hitWall = 0
-        if(confidence > 0.49) {
+        //if(confidence > 0.49) {
           //console.log(highestNode+":"+confidence)
           //brainRating+=0.3
           ret = aiM(highestNode)
           score = ret[0]
           hitWall = ret[1]
           brainRating+=score
-        }else{
-          brainRating-=0.2
-        }
+        //}else{
+          //brainRating-=0.2
+        //}
         if(hitWall > 0) {
           brainRating-=1
           endGame = 1
